@@ -27,7 +27,6 @@ freitag = ["", deutsch, bwl, informatik, informatik, bwl, bwl]
 
 name = ""
 password = base64.b64decode("").decode("utf-8")         #temp   
-
  
 #Chrome öffnen
 driver = webdriver.Chrome("chromedriver.exe")
@@ -49,20 +48,25 @@ driver.switch_to.window(driver.window_handles[-1])
 #öffnen
 def opentab(temp):
     global i
-    for x in range(i):
+    for x in range(i - 1):
+        driver.switch_to.window(driver.window_handles[0])
         driver.close()
-        driver.switch_to.window(driver.window_handles[-1])
+    driver.switch_to.window(driver.window_handles[0])
     driver.get(temp[0])
     i = 1
     while True:
         try:
             print(temp[i])
-            driver.execute_script('window.open("{}","_blank");'.format(temp[i]))
-            driver.switch_to.window(driver.window_handles[-1])
+            driver.execute_script('window.open("{}","{}");'.format(temp[i], i))
+            driver.switch_to.window(driver.window_handles[i])
             i += 1
         except:
+            try:
+                driver.switch_to.window(driver.window_handles[i])
+            except:
+                pass
             i -= 1
-            return        
+            return       
         
 #abfragen
 while True:
