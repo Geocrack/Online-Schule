@@ -30,8 +30,8 @@ mittwoch = ["", "", "", deutsch, mathe, mathe, englisch, "", physik, physik]
 donnerstag = ["", "", "", ggk, mathe, bwl, bwl]
 freitag = ["", deutsch, bwl, informatik, informatik, bwl, bwl]
 
-name = "simon.gut"
-password = base64.b64decode("QXJ0b3MxMDAw").decode("utf-8")         #temp   
+name = ""
+password = base64.b64decode("").decode("utf-8")         #temp   
  
 #Chrome öffnen
 driver = webdriver.Chrome("chromedriver.exe")
