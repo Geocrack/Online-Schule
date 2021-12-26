@@ -3,6 +3,9 @@ import datetime
 import time
 import pyautogui
 import base64                                                        #temp
+from  threading import Thread
+import keyboard
+import sys
 
 
 moodle = ["https://moodle.humpis-schule.rv.schule-bw.de/moodle/my/"]
@@ -18,6 +21,8 @@ informatik = ["https://moodle.humpis-schule.rv.schule-bw.de/moodle/course/view.p
 physik = ["https://moodle.humpis-schule.rv.schule-bw.de/moodle/course/view.php?id=1625","https://moodle.humpis-schule.rv.schule-bw.de/moodle/mod/bigbluebuttonbn/view.php?id=54726"]
 
 i = 0
+schluss = False
+lookup = None
 stunden = [7.27 ,8.12, 9.17, 10.02, 11.02, 11.47, 12.40, 13.28, 14.12, 15.07, 15.57]
 montag = ["",deutsch, deutsch, englisch, englisch, bwl, mathe, "", fm_2, fm_2]
 dienstag = ["", fm_1, fm_1, englisch, ggk, religion, religion]
@@ -25,8 +30,8 @@ mittwoch = ["", "", "", deutsch, mathe, mathe, englisch, "", physik, physik]
 donnerstag = ["", "", "", ggk, mathe, bwl, bwl]
 freitag = ["", deutsch, bwl, informatik, informatik, bwl, bwl]
 
-name = ""
-password = base64.b64decode("").decode("utf-8")         #temp   
+name = "simon.gut"
+password = base64.b64decode("QXJ0b3MxMDAw").decode("utf-8")         #temp   
  
 #Chrome öffnen
 driver = webdriver.Chrome("chromedriver.exe")
@@ -34,6 +39,18 @@ pyautogui.keyDown('ctrl')
 pyautogui.press('w')
 pyautogui.keyUp('ctrl')
 driver.maximize_window()
+
+#peüfen ob man den Driver schließen möchte
+def schliesen():
+    global schluss
+    while True:
+        if keyboard.is_pressed("#"):
+            schluss = True
+            driver.close()
+            driver.quit()  
+            sys.exit()                 
+thread_1 = Thread(target = schliesen)
+thread_1.start()
 
 #Moodle anmelden
 driver.execute_script('window.open("{}","_blank");'.format(moodle[0]))
@@ -47,29 +64,33 @@ driver.switch_to.window(driver.window_handles[-1])
 
 #öffnen
 def opentab(temp):
-    global i
+    global i, lookup
+    if temp == lookup:
+        return
+    lookup = temp
     for x in range(i - 1):
         driver.switch_to.window(driver.window_handles[0])
         driver.close()
     driver.switch_to.window(driver.window_handles[0])
     driver.get(temp[0])
-    i = 1
+    i = 0
     while True:
         try:
-            print(temp[i])
+            print(temp[i + 1])
+            i += 1
             driver.execute_script('window.open("{}","{}");'.format(temp[i], i))
             driver.switch_to.window(driver.window_handles[i])
-            i += 1
         except:
             try:
-                driver.switch_to.window(driver.window_handles[i])
+                driver.switch_to.window(driver.window_handles[i + 1])
             except:
                 pass
-            i -= 1
             return       
         
 #abfragen
 while True:
+    if schluss:
+        sys.exit()
     wochentag = int(datetime.datetime.now().strftime("%w"))
     stunde = float(datetime.datetime.now().strftime("%H"))
     minute = float(datetime.datetime.now().strftime("%M"))
@@ -77,15 +98,18 @@ while True:
     t = 0
     for s in stunden:
         t += 1
-        if s == uhrzeit:
-            if wochentag == 1:
-                opentab(montag[t])
-            elif wochentag == 2:
-                opentab(dienstag[t])
-            elif wochentag == 3:
-                opentab(mittwoch[t])
-            elif wochentag == 4:
-                opentab(donnerstag[t])
-            elif wochentag == 5:
-                opentab(freitag[t])    
+        try:
+            if s == uhrzeit:
+                if wochentag == 1:
+                    opentab(montag[t])
+                elif wochentag == 2:
+                    opentab(dienstag[t])
+                elif wochentag == 3:
+                    opentab(mittwoch[t])
+                elif wochentag == 4:
+                    opentab(donnerstag[t])
+                elif wochentag == 5:
+                    opentab(freitag[t])  
+        except:
+            break  
     time.sleep(40)
